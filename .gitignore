@@ -1,0 +1,33 @@
+
+# Simulation artifacts
+*.vvp
+*.vcd
+*.fst
+*.lxt
+*.lxt2
+*.log
+
+# Temporary and generated files
+*.tmp
+*.bak
+*.swp
+*.swo
+__pycache__/
+*.pyc
+
+# Local build outputs
+build/
+simulations/
+*.o
+*.out
+
+# FPGA-generated files
+fpga/build/
+*.fs
+*.bit
+
+# Editor and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
