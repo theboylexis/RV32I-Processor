@@ -1,123 +1,247 @@
-# RV32I Processor — RTL Design & FPGA Implementation
+# RV32I Processor | RTL Design and FPGA Implementation
 
-An ongoing computer architecture project focused on the design, implementation, verification, and performance evaluation of a 32-bit RISC-V processor using **SystemVerilog**.
+A computer architecture and digital hardware engineering project focused on designing, implementing, verifying, and evaluating a 32-bit RISC-V processor using **SystemVerilog**.
 
-This project builds on my completed [FPGA-Synthesizable 8-Bit CPU](https://github.com/theboylexis/FPGA-Synthesizable-8Bit-CPU), progressing from a custom multi-cycle processor toward the standardized RISC-V instruction set architecture and more advanced processor microarchitectures.
+This project builds upon my completed [FPGA-Synthesizable 8-Bit CPU](https://github.com/theboylexis/FPGA-Synthesizable-8Bit-CPU), progressing from a custom multi-cycle processor to the standardized RISC-V instruction set architecture and more advanced processor microarchitectures.
 
-Development follows an incremental hardware engineering approach, combining architectural design, RTL implementation, module-level verification, processor integration, and eventual FPGA-based performance evaluation.
+Development follows an incremental hardware engineering methodology involving architectural planning, modular RTL development, functional verification, processor integration, and eventual FPGA implementation and performance characterization.
+
+**Current milestone:** The single-cycle RV32I processor has completed its initial implementation and directed verification. All seven processor-level integration testbenches pass. Development is transitioning toward a five-stage pipelined implementation.
 
 ## Project Objectives
 
-- Design and verify an RV32I single-cycle processor.
-- Develop a five-stage pipelined RV32I implementation.
-- Implement data forwarding, hazard detection, stalls, and pipeline flushing.
-- Support arithmetic, logical, memory-access, branch, and jump instructions.
-- Develop comprehensive SystemVerilog verification environments.
-- Implement and physically validate the processor on an FPGA.
-- Analyze timing, resource utilization, and architectural performance.
-- Investigate a research-oriented architectural extension where justified by a meaningful research question.
+- Design and verify a 32-bit single-cycle processor implementing the core RV32I computational, memory, and control-flow instructions.
+- Develop a five-stage pipelined RV32I processor.
+- Implement data forwarding, hazard detection, pipeline stalls, and control-flow flushing.
+- Develop systematic module-level and processor-level verification environments.
+- Validate architectural behavior against a trusted RISC-V reference implementation.
+- Implement and physically validate the processor on FPGA hardware.
+- Evaluate timing, resource utilization, instruction throughput, and execution performance.
+- Investigate potential research-oriented architectural optimizations based on measured results.
 
 ## Development Roadmap
 
 - [x] Establish repository structure and development environment.
-- [x] Study introductory RV32I concepts and instruction formats.
-- [x] Establish the initial single-cycle datapath architecture.
-- [x] Implement foundational processor modules in SystemVerilog.
-- [x] Develop and execute initial module-level tests.
-- [x] Integrate the initial single-cycle processor datapath.
-- [x] Execute and verify the first processor-level test program.
-- [ ] Complete the single-cycle RV32I instruction implementation.
-- [ ] Extend verification to instruction edge cases and comprehensive processor tests.
-- [ ] Develop and verify a five-stage pipelined processor.
+- [x] Study foundational RV32I concepts and instruction formats.
+- [x] Define the initial single-cycle datapath and control architecture.
+- [x] Implement and test foundational SystemVerilog modules.
+- [x] Integrate the single-cycle processor.
+- [x] Implement register-register arithmetic, logical, shift, and comparison instructions.
+- [x] Implement immediate arithmetic, logical, shift, and comparison instructions.
+- [x] Implement all six RV32I conditional branch instructions.
+- [x] Implement JAL and JALR.
+- [x] Implement LUI and AUIPC.
+- [x] Implement byte, halfword, and word memory accesses.
+- [x] Develop directed processor-level integration tests.
+- [x] Establish an automated single-cycle regression suite.
+- [ ] Extend verification to architectural edge cases and instruction legality.
+- [ ] Address remaining RV32I architectural requirements and exception behavior.
+- [ ] Implement and verify a five-stage pipelined processor.
 - [ ] Implement forwarding, hazard detection, stalls, and pipeline flushing.
+- [ ] Develop reference-model comparison and broader ISA verification.
 - [ ] Implement and validate the processor on FPGA hardware.
-- [ ] Collect synthesis, timing, and resource utilization results.
-- [ ] Conduct architectural benchmarking and comparative analysis.
+- [ ] Collect synthesis, timing, and resource utilization measurements.
+- [ ] Conduct architectural benchmarking and performance comparisons.
 - [ ] Evaluate a research-motivated architectural extension.
 
-## Planned Architecture
+## Processor Architecture
 
-| Feature | Specification / Target |
+| Feature | Specification |
 |---|---|
-| ISA | RISC-V RV32I |
-| Integer register width (XLEN) | 32 bits |
+| Target ISA | RISC-V RV32I |
+| Register width (XLEN) | 32 bits |
 | General-purpose registers | 32 × 32-bit |
 | Zero register | x0 hardwired to zero |
 | Instruction width | 32 bits |
 | RTL language | SystemVerilog |
-| Initial microarchitecture | Single-cycle |
-| Advanced microarchitecture | Five-stage pipeline |
-| Pipeline stages | IF, ID, EX, MEM, WB |
-| Initial instruction memory | 256 × 32-bit words |
-| Initial data memory | 256 × 32-bit words |
-| Initial memory access support | Aligned 32-bit loads and stores |
-| Verification tools | Icarus Verilog; additional tools to be evaluated |
+| Implemented microarchitecture | Single-cycle |
+| Planned microarchitecture | Five-stage pipeline |
+| Planned pipeline stages | IF, ID, EX, MEM, WB |
+| Instruction memory | 256 × 32-bit words |
+| Data memory | 256 × 32-bit words |
+| Memory organization | Separate instruction and data memories |
+| Data endianness | Little-endian |
+| Memory operations | Byte, halfword, and word loads/stores |
+| Simulation | Icarus Verilog |
 | FPGA target | To be finalized |
-| Performance evaluation | Clock frequency, critical path, resource utilization, CPI, and benchmarking |
+| Verification status | Directed unit and integration tests passed |
 
-The single-cycle processor serves as the architectural and verification baseline for subsequent pipelining and performance analysis.
+The current implementation uses separate instruction and data memories to simplify the datapath and allow instruction fetch and data access without contention between those two memory structures.
 
-The current integrated implementation supports a limited subset of RV32I instructions. Full RV32I compliance has not been established.
+The single-cycle processor serves as the functional reference for subsequent pipeline development.
+
+**ISA scope:** The processor implements 37 core RV32I computational, memory, branch, and jump instructions. Full RV32I compliance has not yet been established. FENCE, ECALL, EBREAK, architectural exceptions, and additional instruction-legality requirements remain outside the verified implementation.
 
 ## RTL Implementation
 
-Development uses modular SystemVerilog components organized into reusable hardware blocks and microarchitecture-specific modules.
+The processor is organized into reusable hardware modules and microarchitecture-specific components.
 
-### Completed Foundational Modules
+### Foundational Hardware Modules
 
-| Module | Description | Initial Verification |
-|---|---|---|
-| Program Counter | 32-bit sequential PC register with synchronous reset | Passed |
-| Register File | 32 × 32-bit registers, two asynchronous read ports, one synchronous write port, x0 protection | Passed |
-| Arithmetic Logic Unit | 32-bit arithmetic, logical, shift, and comparison operations | Passed |
-| Immediate Generator | I, S, B, U, and J immediate extraction and extension | Passed |
-| Control Unit | Initial instruction decoding and datapath control generation | Passed |
-| Instruction Memory | Byte-addressed instruction fetch with combinational reads | Passed |
-| Data Memory | Aligned 32-bit word reads and synchronous writes | Passed |
+| Module | Function |
+|---|---|
+| Program Counter | Maintains the current instruction address with synchronous reset |
+| Register File | 32 × 32-bit registers, two asynchronous read ports, one synchronous write port, x0 protection |
+| Arithmetic Logic Unit | Arithmetic, logical, shift, and comparison operations |
+| Immediate Generator | Extraction and extension of I, S, B, U, and J immediates |
+| Control Unit | Instruction decoding and generation of datapath control signals |
+| Instruction Memory | Combinational instruction reads using the program counter |
+| Data Memory | Byte-addressed loads and stores with partial-word writes and load extension |
+| Single-Cycle CPU | Integration of processor datapath, instruction control, memory access, and register write-back |
 
-### Single-Cycle Processor Integration
+All foundational components have undergone initial functional simulation and testing.
 
-The initial processor implementation connects the foundational modules into an executable single-cycle datapath.
+### Instruction Support
 
-Implemented functionality includes:
+**Register-register operations**
 
-- Instruction fetch using the program counter.
-- Sequential PC advancement.
-- Instruction decoding and control-signal generation.
-- Register operand retrieval.
-- Register-register ALU operations.
-- ADDI execution.
-- Aligned LW and SW execution.
-- ALU operand selection and register write-back.
-- Synchronous updates to architectural state.
+ADD, SUB, AND, OR, XOR, SLL, SRL, SRA, SLT, SLTU
 
-The current processor prototype has successfully executed a six-instruction integration test.
+**Immediate operations**
 
-Conditional branches, jumps, additional immediate operations, byte/halfword memory accesses, and remaining ISA functionality are not yet implemented in the integrated processor.
+ADDI, ANDI, ORI, XORI, SLLI, SRLI, SRAI, SLTI, SLTIU
+
+**Load instructions**
+
+LB, LH, LW, LBU, LHU
+
+**Store instructions**
+
+SB, SH, SW
+
+**Conditional branches**
+
+BEQ, BNE, BLT, BGE, BLTU, BGEU
+
+**Unconditional jumps**
+
+JAL, JALR
+
+**Upper-immediate instructions**
+
+LUI, AUIPC
+
+These instructions have been implemented in RTL and exercised through directed testing. Verification coverage varies between instruction types and does not yet establish correctness for every possible operand or encoding.
+
+### Single-Cycle Execution
+
+The single-cycle microarchitecture performs instruction processing through the following logical activities:
+
+1. **Instruction Fetch:** Retrieve the instruction addressed by the program counter.
+2. **Instruction Decode:** Interpret the instruction fields and generate control signals.
+3. **Operand Retrieval:** Read source registers and generate immediate operands.
+4. **Execution:** Perform arithmetic, logical, comparison, address-generation, or control-flow operations.
+5. **Memory Access:** Read or write data memory when required.
+6. **Register Write-Back:** Select and write the result to the destination register.
+7. **PC Update:** Select the sequential address, branch target, or jump target.
+
+These activities are not separate clock stages in the single-cycle architecture. The required combinational logic operates within a single clock interval, and sequential state is updated at the active clock edge.
+
+The clock period must accommodate the longest relevant combinational path.
+
+## Control Flow
+
+The processor supports sequential execution, conditional branches, and unconditional jumps.
+
+**Sequential execution**
+
+```text
+Next PC = PC + 4
+```
+
+**Conditional branches**
+
+The control unit determines the branch instruction type, while comparison logic evaluates the required signed or unsigned relationship between the two source operands.
+
+```text
+Branch taken:     Next PC = PC + immediate
+Branch not taken: Next PC = PC + 4
+```
+
+**JAL**
+
+JAL calculates a PC-relative jump target and writes the return address to the destination register.
+
+```text
+Next PC = PC + J-type immediate
+rd = PC + 4
+```
+
+**JALR**
+
+JALR calculates a register-relative target and clears the least significant target bit.
+
+```text
+Next PC = (rs1 + I-type immediate) & 0xFFFFFFFE
+rd = PC + 4
+```
+
+Architectural traps for misaligned instruction targets have not yet been implemented.
+
+## Data Memory Architecture
+
+The data memory is organized as 256 words of 32 bits each, providing 1 KiB of byte-addressable storage in the current simulation model.
+
+The memory supports little-endian addressing, where the lowest-addressed byte occupies the least significant eight bits of its containing word.
+
+**Load operations**
+
+- LB: Load an 8-bit value and sign-extend to 32 bits.
+- LBU: Load an 8-bit value and zero-extend to 32 bits.
+- LH: Load a 16-bit value and sign-extend to 32 bits.
+- LHU: Load a 16-bit value and zero-extend to 32 bits.
+- LW: Load a 32-bit word.
+
+**Store operations**
+
+- SB: Update the addressed byte.
+- SH: Update the addressed halfword.
+- SW: Update the addressed word.
+
+Effective addresses are calculated by adding the base-register value to the sign-extended instruction immediate.
+
+The memory implementation includes alignment checks. Invalid or misaligned reads may produce unknown simulation values, while invalid or misaligned writes are suppressed in the tested implementation. These behaviors are implementation safeguards and do not replace RISC-V architectural exception handling.
 
 ## Verification
 
-Verification is developed alongside RTL implementation.
+Verification has been performed incrementally alongside RTL development.
+
+The verification strategy includes isolated hardware-module tests, instruction decoding tests, and integrated processor-level programs.
 
 ### Module-Level Verification
 
-The following initial directed tests have passed:
+Directed tests have been developed for the following modules and subsystems:
 
-| Module / Subsystem | Tests Passed |
-|---|---:|
-| Program Counter | 5 |
-| Register File | 5 |
-| ALU | 20 |
-| Immediate Generator | 12 |
-| Control Unit | 10 |
-| Memory Subsystem | 8 |
-| **Total** | **60** |
+- Program Counter
+- Register File
+- Arithmetic Logic Unit
+- Immediate Generator
+- Control Unit
+- Instruction and Data Memories
 
-These tests evaluate selected functional behavior and edge cases. They do not constitute exhaustive verification.
+Additional verification covers immediate instruction decoding, signed and unsigned arithmetic behavior, shift encodings, byte selection, sign extension, and partial memory writes.
 
-### Processor-Level Integration Test
+### Processor-Level Integration Verification
 
-The first integrated processor test executes the following program:
+Seven integration testbenches are included in the automated regression:
+
+| Testbench | Verification focus |
+|---|---|
+| `tb_single_cycle_cpu.sv` | Basic arithmetic, register write-back, LW, and SW |
+| `tb_branches.sv` | BEQ/BNE behavior and branch-target selection |
+| `tb_branch_comparisons.sv` | Signed and unsigned relational branches |
+| `tb_jumps.sv` | JAL/JALR targets and return-address write-back |
+| `tb_immediate_instructions.sv` | Immediate arithmetic, logic, comparison, and shifts |
+| `tb_upper_immediate.sv` | LUI and AUIPC |
+| `tb_load_store.sv` | Byte, halfword, and word memory operations |
+
+**Current result: All seven processor-level integration testbenches pass.**
+
+These are directed functional tests. Broader instruction combinations, random testing, formal properties, reference-model comparison, and comprehensive ISA compliance testing remain future work.
+
+### Example Integration Program
+
+The first integrated processor test executes:
 
 ```asm
 ADDI x1, x0, 16
@@ -128,7 +252,7 @@ LW   x4, 0(x0)
 ADD  x5, x4, x2
 ```
 
-**Expected and observed final state:**
+Expected and observed architectural state:
 
 | Register / Memory | Value |
 |---|---:|
@@ -139,20 +263,7 @@ ADD  x5, x4, x2
 | x5 | 30 |
 | Data Memory[0] | 23 |
 
-All register and memory checks passed. Sequential PC progression was also verified.
-
-**Integration result: FIRST INTEGRATED CPU PROGRAM PASSED**
-
-### Planned Verification Extensions
-
-- Expanded instruction-level directed testing.
-- Boundary-condition and signed/unsigned arithmetic testing.
-- Branch and jump verification.
-- Additional memory-access and alignment tests.
-- Randomized instruction sequences where appropriate.
-- Comparison against a trusted RISC-V reference implementation.
-- Broader instruction-set compliance testing.
-- FPGA hardware validation against simulation results.
+The processor correctly executed the sequence in the integration test and produced the expected register and memory contents.
 
 ## Repository Structure
 
@@ -178,14 +289,14 @@ RV32I-Processor/
 │   └── pipeline/
 ├── tb/
 │   ├── unit/
-│   │   ├── tb_alu.sv
-│   │   ├── tb_control_unit.sv
-│   │   ├── tb_immediate_generator.sv
-│   │   ├── tb_memory.sv
-│   │   ├── tb_program_counter.sv
-│   │   └── tb_register_file.sv
 │   └── integration/
-│       └── tb_single_cycle_cpu.sv
+│       ├── tb_single_cycle_cpu.sv
+│       ├── tb_branches.sv
+│       ├── tb_branch_comparisons.sv
+│       ├── tb_jumps.sv
+│       ├── tb_immediate_instructions.sv
+│       ├── tb_upper_immediate.sv
+│       └── tb_load_store.sv
 ├── programs/
 │   ├── tests/
 │   └── benchmarks/
@@ -194,79 +305,125 @@ RV32I-Processor/
 │   ├── top/
 │   └── reports/
 ├── scripts/
+│   └── run_single_cycle_tests.ps1
 ├── README.md
 └── .gitignore
 ```
 
-## Simulation
+## Running the Simulations
 
-The initial processor integration test can be compiled using Icarus Verilog with SystemVerilog support enabled.
+The project uses Icarus Verilog with SystemVerilog support.
 
-From the repository root:
+### Automated Single-Cycle Regression
+
+From the repository root on Windows, run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run_single_cycle_tests.ps1
+```
+
+This executes the regression script with a process-scoped execution-policy bypass. Review scripts before running them.
+
+The regression script compiles and executes seven processor-level integration testbenches.
+
+Expected successful completion:
+
+```text
+ALL SINGLE-CYCLE INTEGRATION TESTS PASSED
+```
+
+### Individual Processor Integration Test
+
+Compile:
 
 ```powershell
 iverilog -g2012 -s tb_single_cycle_cpu -o tb_cpu.vvp rtl/common/program_counter.sv rtl/common/register_file.sv rtl/common/alu.sv rtl/common/immediate_generator.sv rtl/common/instruction_memory.sv rtl/common/data_memory.sv rtl/single_cycle/control_unit.sv rtl/single_cycle/single_cycle_cpu.sv tb/integration/tb_single_cycle_cpu.sv
 ```
 
-Run the simulation:
+Run:
 
 ```powershell
 vvp tb_cpu.vvp
 ```
 
-Successful execution produces:
+Expected successful completion:
 
 ```text
 FIRST INTEGRATED CPU PROGRAM PASSED
 ```
 
-The current integration test uses a simulation-loaded program and directly inspects the final architectural state.
+## Development Milestones
 
-## Performance Analysis
+### M1: Architecture and ISA Planning
 
-Future work will evaluate:
+Initial architecture, instruction formats, datapath organization, and verification requirements have been established.
+
+Remaining architectural documentation and specification details will be refined as development progresses.
+
+### M2: Single-Cycle RV32I Processor
+
+**Status: Initial implementation and directed verification completed**
+
+- Foundational RTL modules implemented.
+- Core arithmetic and logical operations supported.
+- Immediate instruction execution supported.
+- Conditional branches and jumps implemented.
+- LUI and AUIPC implemented.
+- Byte, halfword, and word memory operations implemented.
+- Seven integration testbenches passing.
+- Automated regression script established.
+
+Remaining work includes broader architectural verification, exception behavior, and additional specification coverage.
+
+### M3: Five-Stage Pipelined Processor
+
+**Status: Not started**
+
+Planned pipeline stages:
+
+1. Instruction Fetch (IF)
+2. Instruction Decode (ID)
+3. Execute (EX)
+4. Memory Access (MEM)
+5. Write Back (WB)
+
+Development will introduce pipeline registers and progressively address data hazards, control hazards, forwarding, stalls, and instruction flushing.
+
+### M4: Comprehensive Verification
+
+**Status: Initial verification completed; expanded phase pending**
+
+Future work includes reference-model comparison, broader instruction coverage, edge cases, and verification of pipeline hazards.
+
+### M5: FPGA Implementation and Performance Analysis
+
+**Status: Not started**
+
+The completed processor implementations will be synthesized and evaluated on FPGA hardware.
+
+### M6: Research-Oriented Architectural Extension
+
+**Status: Future consideration**
+
+Potential architectural experiments will be selected based on measurable engineering questions and results from the baseline implementations.
+
+## Performance Evaluation
+
+Future analysis will investigate:
 
 - Maximum achievable clock frequency.
-- Critical-path delay and timing closure.
-- FPGA logic, register, and memory utilization.
-- Instruction throughput and cycles per instruction.
-- Program execution time under documented workloads.
-- Pipeline stalls and control-flow penalties.
-- Comparative performance of single-cycle and pipelined implementations.
+- Critical-path delay.
+- FPGA logic and register utilization.
+- On-chip memory resource consumption.
+- Cycles per instruction (CPI).
+- Instruction throughput.
+- Program execution time.
+- Pipeline stall frequency and control-flow penalties.
+- Comparative performance of single-cycle and pipelined designs.
 
-Experimental comparisons will use documented workloads, measurement conditions, and implementation assumptions.
+Performance claims will be supported by measured results and documented experimental conditions.
 
-No FPGA performance measurements have been reported at this stage.
-
-## Current Development Status
-
-**M1 — Architecture & ISA Planning: Partially completed / ongoing refinement**
-
-- [x] Repository structure established.
-- [x] GitHub milestones and initial issues created.
-- [x] Introductory RV32I instruction formats and register model studied.
-- [x] Initial datapath and control requirements established.
-- [ ] Finalize implementation assumptions and remaining ISA requirements.
-- [ ] Refine architecture and verification documentation.
-
-**M2 — RV32I Single-Cycle Processor: In progress**
-
-- [x] Implement and initially verify foundational RTL modules.
-- [x] Implement initial instruction decoder.
-- [x] Integrate the initial single-cycle datapath.
-- [x] Execute the first six-instruction processor-level program.
-- [ ] Strengthen instruction decoder validation.
-- [ ] Implement branches and jumps.
-- [ ] Complete remaining RV32I instruction functionality.
-- [ ] Expand integration and instruction-level verification.
-
-**M3 — Five-Stage Pipelined Processor: Not started**
-
-**M4 — Comprehensive Verification: Initial tests underway; dedicated phase pending**
-
-**M5 — FPGA Implementation & Performance Analysis: Not started**
-
-**M6 — Research-Oriented Architectural Extension: Not started / scope to be evaluated**
+No FPGA timing, resource utilization, or benchmark performance measurements have been reported at this stage.
 
 ## References
 
@@ -278,5 +435,3 @@ No FPGA performance measurements have been reported at this stage.
 **Alex Marfo Appiah**  
 BSc Computer Engineering  
 Kwame Nkrumah University of Science and Technology (KNUST), Ghana
-
-[LinkedIn](https://linkedin.com/in/alexmarfoappiah)
