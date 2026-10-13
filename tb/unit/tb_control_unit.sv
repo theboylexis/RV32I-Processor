@@ -12,6 +12,8 @@ module tb_control_unit;
     logic [2:0] imm_src;
     logic [3:0] alu_op;
     logic valid_instr;
+    logic branch_eq;
+    logic branch_ne;
 
     int test_count = 0;
 
@@ -94,6 +96,51 @@ module tb_control_unit;
         // Unsupported R-type funct7 must not write
         check_control(32'h027302B3,
                       0, 0, 0, 0, 0, 0, 0, "Unsupported R-type");
+
+                      
+        // Valid R-type: SRA x5, x6, x7
+        check_control(32'h407352B3,
+                      7, 0, 1, 0, 0, 0, 1,
+                      "SRA valid encoding");
+
+        // Invalid R-type: unsupported funct7
+        check_control(32'h027302B3,
+                      0, 0, 0, 0, 0, 0, 0,
+                      "Invalid funct7");
+
+        // Invalid R-type: funct7=0100000 with AND funct3
+        check_control(32'h407372B3,
+                      0, 0, 0, 0, 0, 0, 0,
+                      "Invalid funct7/funct3 combination");
+
+        // BEQ x5, x6, 8
+        instruction = 32'h00628463;
+        #1;
+
+        if (branch_eq !== 1'b1 ||
+            branch_ne !== 1'b0 ||
+            valid_instr !== 1'b1 ||
+            imm_src !== 3'd2 ||
+            reg_write !== 1'b0 ||
+            mem_write !== 1'b0)
+            $fatal(1, "FAIL: BEQ decoding");
+
+        $display("PASS: BEQ decoding");
+
+        // BNE x5, x6, 8
+        instruction = 32'h00629463;
+        #1;
+
+        if (branch_eq !== 1'b0 ||
+            branch_ne !== 1'b1 ||
+            valid_instr !== 1'b1 ||
+            imm_src !== 3'd2 ||
+            reg_write !== 1'b0 ||
+            mem_write !== 1'b0)
+            $fatal(1, "FAIL: BNE decoding");
+
+        $display("PASS: BNE decoding");
+
 
         $display("--------------------------------");
         $display("ALL %0d CONTROL TESTS PASSED", test_count);
